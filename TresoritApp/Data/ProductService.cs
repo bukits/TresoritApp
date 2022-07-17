@@ -3,46 +3,55 @@ using TresoritApp.Models;
 
 namespace TresoritApp.Data
 {
-	public class ProductService
+	public class ProductService : IProductService
 	{
-		DbManager dbManager;
+		private readonly IConfiguration _configuration;
+		private const string TableName = "comments";
 
-		public ProductService(DbManager dbManager)
+		public ProductService(IConfiguration configuration)
 		{
-			this.dbManager = dbManager;
+			_configuration = configuration;
 		}
 
-		public List<ProductModel> getPartitions()
+		public CloudTable GetTableClient()
 		{
-			var table = dbManager.GetTableClient();
-			var query = new TableQuery<ProductModel>();
+			CloudStorageAccount storageAccount;
+			storageAccount = CloudStorageAccount.Parse(_configuration["StorageConnectionString"]);
+			CloudTableClient tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+			return tableClient.GetTableReference(TableName);
+		}
+
+		public List<CommentModel> getProducts()
+		{
+			var table = GetTableClient();
+			var query = new TableQuery<CommentModel>();
 			var comments = table.ExecuteQuery(query);
-			List<ProductModel> partitions = comments.GroupBy(comment => comment.PartitionKey).Select(p => p.First()).ToList();
+			List<CommentModel> partitions = comments.GroupBy(comment => comment.PartitionKey).Select(p => p.First()).ToList();
 			return partitions;
 		}
 
-		public List<ProductModel> getComemntsByProductName(string productName)
+		public List<CommentModel> getComemntsByProductName(string productName)
 		{
-			var table = dbManager.GetTableClient();
+			var table = GetTableClient();
 			var condition = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, productName);
-			var query = new TableQuery<ProductModel>().Where(condition);
+			var query = new TableQuery<CommentModel>().Where(condition);
 			var products =  table.ExecuteQuery(query);
-			List<ProductModel> ordered = products.OrderByDescending(t => t.Timestamp).ToList();
+			List<CommentModel> ordered = products.OrderByDescending(t => t.Timestamp).ToList();
 			return ordered;
 		}
 
 		public async Task createComment(string productName, string comment)
 		{
-			var table = dbManager.GetTableClient();
+			var table = GetTableClient();
+			string newID = Guid.NewGuid().ToString();
 
-			ProductModel product = new ProductModel(productName)
+			CommentModel product = new CommentModel(productName, newID)
 			{
 				Comment = comment
 			};
 
-			TableOperation insertOperation = TableOperation.Insert(product);
+			TableOperation insertOperation = TableOperation.InsertOrMerge(product);
 			await table.ExecuteAsync(insertOperation);
-
 		}
 	}
 }

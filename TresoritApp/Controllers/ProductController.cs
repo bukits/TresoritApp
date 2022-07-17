@@ -8,28 +8,28 @@ namespace TresoritApp.Controllers
 	[Route("api/products")]
 	public class ProductController : ControllerBase
 	{
-		private ProductService ProductService;
-		public ProductController(ProductService productService)
+		private IProductService _IProductService;
+		public ProductController(IProductService productService)
 		{
-			ProductService = productService;
+			_IProductService = productService;
 		}
 
 		[HttpGet]
-		public IEnumerable<ProductModel> GetProducts()
+		public IEnumerable<CommentModel> GetProducts()
 		{
-			return ProductService.getPartitions();
+			return _IProductService.getProducts();
 		}
 
 		[HttpGet("productName")]
-		public IEnumerable<ProductModel> getComments(string productName)
+		public IEnumerable<CommentModel> getComments(string productName)
 		{
-			return ProductService.getComemntsByProductName(productName);
+			return _IProductService.getComemntsByProductName(productName);
 		}
 
 		[HttpPost("productName")]
-		public async Task createComment(string productName, string comment)
+		public void createComment(string productName, string comment)
 		{
-			await ProductService.createComment(productName, comment);
+			_IProductService.createComment(productName, comment);
 		}
 	}
 }

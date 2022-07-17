@@ -4,13 +4,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TresoritApp.Models
 {
-	public class ProductModel : TableEntity
+	public class CommentModel : TableEntity
 	{
-		public ProductModel() { }
+		public CommentModel() { }
 
-		public ProductModel(string name)
+		public CommentModel(string product, string commentId)
 		{
-			PartitionKey = name;
+			PartitionKey = product;
+			RowKey = commentId;
 		}
 
 		[Required]
