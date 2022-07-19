@@ -8,6 +8,6 @@ namespace TresoritApp.Data
 
 		public List<CommentModel> getComemntsByProductName(string productName);
 
-		public Task createComment(string productName, string comment);		
+		public Task createComment(CommentModel comment);		
 	}
 }

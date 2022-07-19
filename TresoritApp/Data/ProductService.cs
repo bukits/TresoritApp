@@ -40,17 +40,14 @@ namespace TresoritApp.Data
 			return ordered;
 		}
 
-		public async Task createComment(string productName, string comment)
+		public async Task createComment(CommentModel comment)
 		{
 			var table = GetTableClient();
 			string newID = Guid.NewGuid().ToString();
 
-			CommentModel product = new CommentModel(productName, newID)
-			{
-				Comment = comment
-			};
+			comment.RowKey = newID;
 
-			TableOperation insertOperation = TableOperation.InsertOrMerge(product);
+			TableOperation insertOperation = TableOperation.InsertOrMerge(comment);
 			await table.ExecuteAsync(insertOperation);
 		}
 	}

@@ -20,16 +20,16 @@ namespace TresoritApp.Controllers
 			return _IProductService.getProducts();
 		}
 
-		[HttpGet("productName")]
+		[HttpGet("{productName}")]
 		public IEnumerable<CommentModel> getComments(string productName)
 		{
 			return _IProductService.getComemntsByProductName(productName);
 		}
 
-		[HttpPost("productName")]
-		public void createComment(string productName, string comment)
+		[HttpPost("{productName}")]
+		public async Task createComment(CommentModel comment)
 		{
-			_IProductService.createComment(productName, comment);
+			await _IProductService.createComment(comment);
 		}
 	}
 }
